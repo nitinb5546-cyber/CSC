@@ -1,0 +1,261 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client One-Click Approval Portal — CSC Guardrail</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config" data-stitch-original-src="da8cf5fb6f5ab2e4===../../tailwind.config.js">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#4F46E5',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#4338CA',
+        'primary-container': '#F2EFFF',
+        'on-primary-container': '#1D00A5',
+        'surface': '#F8FAFC',
+        'on-surface': '#0F172A',
+        'surface-card': '#FFFFFF',
+        'on-surface-variant': '#64748B',
+        'surface-subtle': '#F1F5F9',
+        'on-surface-subtle': '#334155',
+        'outline': '#CBD5E1',
+        'outline-variant': '#E2E8F0',
+        'emerald': '#059669',
+        'on-emerald': '#00150B',
+        'emerald-container': '#ECFDF5',
+        'on-emerald-container': '#003825',
+        'amber': '#D97706',
+        'on-amber': '#1F0C00',
+        'amber-container': '#FFFBEB',
+        'on-amber-container': '#4D2600',
+        'error': '#DC2626',
+        'on-error': '#FFFFFF',
+        'error-container': '#FEF2F2',
+        'on-error-container': '#690005',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'md': '6px',
+        'DEFAULT': '8px',
+        'lg': '8px',
+        'xl': '12px',
+        'full': '9999px',
+      },
+      spacing: {
+        'xs': '4px',
+        'sm': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        'section': '24px',
+        'page': '28px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"Geist Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '44px', letterSpacing: '-0.5px', fontWeight: '600' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.25px', fontWeight: '600' }],
+        'headline-lg': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'headline-md': ['18px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'headline-sm': ['15px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['15px', { lineHeight: '22px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '18px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-lg': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'mono-md': ['13px', { lineHeight: '18px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '200ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@500;600&amp;family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+  <div class="min-h-screen bg-surface flex flex-col justify-between py-3xl px-lg">
+
+    <!-- Centered Stripe-Style Contract Approval Container (max-w 720px) -->
+    <main class="w-full max-w-[720px] mx-auto flex flex-col gap-2xl">
+
+      <!-- Top Header -->
+      <header class="flex flex-wrap items-center justify-between gap-md pb-lg border-b border-outline-variant">
+        <div class="flex items-center gap-md">
+          <div class="w-8 h-8 rounded-lg bg-surface-card border border-outline-variant text-on-surface flex items-center justify-center shrink-0">
+            <span data-design-text-token="label-md" class="font-label text-label-md">PS</span>
+          </div>
+          <div class="flex items-center gap-sm">
+            <span data-design-text-token="headline-sm" class="font-headline text-headline-sm text-on-surface">PixelCraft Studio</span>
+            <span data-component-id="badge-success" data-component-type="badge" data-component-variant="success" role="status" class="inline-flex items-center gap-xs px-sm py-xs rounded-full bg-emerald-container text-on-emerald-container whitespace-nowrap">
+              <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">verified</span>
+              <span data-design-text-token="label-sm" class="font-label text-label-sm whitespace-nowrap">Verified SOW</span>
+            </span>
+          </div>
+        </div>
+
+        <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant bg-surface-card px-md py-xs rounded-md border border-outline-variant tabular-nums whitespace-nowrap">
+          Change Request #CSC-892A
+        </span>
+      </header>
+
+      <!-- Title Block -->
+      <section aria-label="Scope adjustment overview" class="flex flex-col gap-sm">
+        <h1 data-design-text-token="headline-lg" class="font-headline text-headline-lg text-on-surface text-balance">
+          Scope Adjustment Review — VastraKart Store Redesign
+        </h1>
+        <p data-design-text-token="body-lg" class="font-body text-body-lg text-on-surface-variant text-pretty">
+          No budget increase required. Review the Phase 1 trade-off below.
+        </p>
+      </section>
+
+      <!-- Before vs. After Comparison Card (2-Column Grid) -->
+      <section aria-label="Scope trade-off comparison" class="bg-surface-card border border-outline-variant rounded-xl overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-outline-variant">
+
+          <!-- Left Column: Adding to Phase 1 -->
+          <div class="p-xl flex flex-col gap-lg">
+            <div class="flex items-center justify-between gap-sm">
+              <h2 data-design-text-token="headline-sm" class="font-headline text-headline-sm text-on-surface">Adding to Phase 1</h2>
+              <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-emerald-container bg-emerald-container px-sm py-xs rounded-md tabular-nums whitespace-nowrap">+14 hrs</span>
+            </div>
+
+            <ul class="flex flex-col gap-md">
+              <li class="p-md rounded-lg bg-surface border border-outline-variant flex items-start gap-md">
+                <span class="material-symbols-outlined text-[20px] text-emerald shrink-0 mt-0.5" aria-hidden="true">add_circle</span>
+                <div class="flex flex-col gap-xs min-w-0">
+                  <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">WhatsApp / SMS 2FA OTP</span>
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">6 hrs allocated</span>
+                </div>
+              </li>
+
+              <li class="p-md rounded-lg bg-surface border border-outline-variant flex items-start gap-md">
+                <span class="material-symbols-outlined text-[20px] text-emerald shrink-0 mt-0.5" aria-hidden="true">add_circle</span>
+                <div class="flex flex-col gap-xs min-w-0">
+                  <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Excel &amp; CSV Order Export</span>
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">8 hrs allocated</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Right Column: Moving to Phase 2 -->
+          <div class="p-xl flex flex-col gap-lg">
+            <div class="flex items-center justify-between gap-sm">
+              <h2 data-design-text-token="headline-sm" class="font-headline text-headline-sm text-on-surface">Moving to Phase 2</h2>
+              <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-amber-container bg-amber-container px-sm py-xs rounded-md tabular-nums whitespace-nowrap">-14 hrs</span>
+            </div>
+
+            <ul class="flex flex-col gap-md">
+              <li class="p-md rounded-lg bg-surface border border-outline-variant flex items-start gap-md">
+                <span class="material-symbols-outlined text-[20px] text-amber shrink-0 mt-0.5" aria-hidden="true">arrow_circle_right</span>
+                <div class="flex flex-col gap-xs min-w-0">
+                  <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Blog &amp; Content CMS</span>
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">14 hrs deferred to Phase 2</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Financial & Timeline Summary Strip (3 Crisp Metric Boxes) -->
+      <section aria-label="Financial and timeline summary" class="grid grid-cols-1 sm:grid-cols-3 gap-lg items-stretch">
+        <!-- Box 1: Net Cost Change -->
+        <article class="h-full bg-surface-card border border-outline-variant rounded-xl p-lg flex flex-col justify-between gap-sm">
+          <span data-design-text-token="label-md" class="font-label text-label-md text-on-surface-variant">Net Cost Change</span>
+          <span data-design-text-token="mono-lg" class="font-mono text-mono-lg text-emerald tabular-nums">₹0</span>
+        </article>
+
+        <!-- Box 2: Revised Contract Total -->
+        <article class="h-full bg-surface-card border border-outline-variant rounded-xl p-lg flex flex-col justify-between gap-sm">
+          <span data-design-text-token="label-md" class="font-label text-label-md text-on-surface-variant">Revised Contract Total</span>
+          <span data-design-text-token="mono-lg" class="font-mono text-mono-lg text-on-surface tabular-nums">₹1,50,000</span>
+        </article>
+
+        <!-- Box 3: Launch Deadline Impact -->
+        <article class="h-full bg-surface-card border border-outline-variant rounded-xl p-lg flex flex-col justify-between gap-sm">
+          <span data-design-text-token="label-md" class="font-label text-label-md text-on-surface-variant">Launch Deadline Impact</span>
+          <span data-design-text-token="headline-sm" class="font-headline text-headline-sm text-on-surface">None (On Schedule)</span>
+        </article>
+      </section>
+
+      <!-- Approval Footer -->
+      <section aria-label="Client approval confirmation" class="bg-surface-card border border-outline-variant rounded-xl p-xl flex flex-col gap-lg">
+        <label class="flex items-center gap-md cursor-pointer select-none">
+          <input type="checkbox" checked class="w-4 h-4 rounded-sm border-outline text-primary focus:ring-primary">
+          <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">
+            I confirm this scope trade-off for Phase 1 delivery
+          </span>
+        </label>
+
+        <div class="flex flex-col items-center gap-md">
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="w-full inline-flex items-center justify-center gap-sm px-lg py-md rounded-lg bg-primary text-on-primary hover:bg-primary-hover transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">check</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Approve Scope Swap</span>
+          </button>
+
+          <button type="button" class="inline-flex items-center justify-center gap-xs px-md py-xs rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-subtle transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Request Call to Discuss</span>
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Minimal Trust Footer -->
+    <footer class="w-full max-w-[720px] mx-auto pt-2xl flex flex-wrap items-center justify-between gap-md text-on-surface-variant">
+      <div class="flex items-center gap-xs">
+        <span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">verified_user</span>
+        <span data-design-text-token="label-sm" class="font-label text-label-sm">Protected by CSC Guardrail</span>
+      </div>
+      <span data-design-text-token="mono-sm" class="font-mono text-mono-sm tabular-nums">SOW-VK-2026-04</span>
+    </footer>
+
+  </div>
+
+
+</body></html>

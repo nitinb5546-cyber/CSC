@@ -1,0 +1,428 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Scope Guardrail &amp; Trade-Off Swap Simulator — CSC Guardrail</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config" data-stitch-original-src="da8cf5fb6f5ab2e4===../../tailwind.config.js">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#4F46E5',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#4338CA',
+        'primary-container': '#F2EFFF',
+        'on-primary-container': '#1D00A5',
+        'surface': '#F8FAFC',
+        'on-surface': '#0F172A',
+        'surface-card': '#FFFFFF',
+        'on-surface-variant': '#64748B',
+        'surface-subtle': '#F1F5F9',
+        'on-surface-subtle': '#334155',
+        'outline': '#CBD5E1',
+        'outline-variant': '#E2E8F0',
+        'emerald': '#059669',
+        'on-emerald': '#00150B',
+        'emerald-container': '#ECFDF5',
+        'on-emerald-container': '#003825',
+        'amber': '#D97706',
+        'on-amber': '#1F0C00',
+        'amber-container': '#FFFBEB',
+        'on-amber-container': '#4D2600',
+        'error': '#DC2626',
+        'on-error': '#FFFFFF',
+        'error-container': '#FEF2F2',
+        'on-error-container': '#690005',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'md': '6px',
+        'DEFAULT': '8px',
+        'lg': '8px',
+        'xl': '12px',
+        'full': '9999px',
+      },
+      spacing: {
+        'xs': '4px',
+        'sm': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        'section': '24px',
+        'page': '28px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"Geist Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '44px', letterSpacing: '-0.5px', fontWeight: '600' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.25px', fontWeight: '600' }],
+        'headline-lg': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'headline-md': ['18px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'headline-sm': ['15px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['15px', { lineHeight: '22px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '18px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-lg': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'mono-md': ['13px', { lineHeight: '18px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '200ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@500;600&amp;family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+  <div class="min-h-screen flex bg-surface">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-on-surface/30 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Left Sidebar (240px) -->
+    <aside id="app-sidebar" class="fixed lg:sticky top-0 left-0 z-40 w-[240px] shrink-0 min-h-screen bg-surface-card border-r border-outline-variant flex flex-col justify-between -translate-x-full lg:translate-x-0 transition-transform duration-surface-enter ease-surface-enter">
+      <div class="flex flex-col gap-2xl p-lg">
+        <!-- Brand Logo -->
+        <div class="flex items-center justify-between px-sm pt-xs">
+          <a href="#" class="flex items-center gap-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
+            <div class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: &#39;FILL&#39; 1;">verified_user</span>
+            </div>
+            <div class="flex flex-col">
+              <span data-design-text-token="headline-sm" class="font-headline text-headline-sm text-on-surface tracking-tight">CSC Guardrail</span>
+            </div>
+          </a>
+          <button type="button" class="lg:hidden p-xs rounded-lg text-on-surface-variant hover:bg-surface-subtle" onclick="toggleSidebar()" aria-label="Close navigation">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <!-- Primary Navigation -->
+        <nav aria-label="Main navigation" class="flex flex-col gap-xs">
+          <a href="../scope-dashboard/AgencyScopeHealthDashboard.html" class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change min-w-0">
+            <span class="material-symbols-outlined text-[18px] shrink-0">dashboard</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg truncate">Scope Dashboard</span>
+          </a>
+          <a href="#" aria-current="page" class="flex items-center gap-md px-md py-sm rounded-lg bg-primary-container text-on-primary-container transition-colors duration-state-change ease-state-change min-w-0">
+            <span class="material-symbols-outlined text-[18px] shrink-0" style="font-variation-settings: &#39;FILL&#39; 1;">tune</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg truncate">Guardrail Simulator</span>
+          </a>
+          <a href="#" class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change min-w-0">
+            <span class="material-symbols-outlined text-[18px] shrink-0">visibility</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg truncate">Client Portal Preview</span>
+          </a>
+          <a href="#" class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change min-w-0">
+            <span class="material-symbols-outlined text-[18px] shrink-0">receipt_long</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg truncate">Audit Ledger</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Bottom Workspace Badge -->
+      <div class="p-lg border-t border-outline-variant">
+        <div class="flex items-center gap-md px-sm py-sm rounded-lg bg-surface border border-outline-variant">
+          <div class="w-8 h-8 rounded-md bg-surface-subtle text-on-surface flex items-center justify-center shrink-0">
+            <span data-design-text-token="label-md" class="font-label text-label-md">PS</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <span data-design-text-token="label-lg" class="font-label text-label-lg text-on-surface truncate">PixelCraft Studio</span>
+            <span data-design-text-token="label-sm" class="font-label text-label-sm text-on-surface-variant">Agency Workspace</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Shell -->
+    <div class="flex-1 min-w-0 flex flex-col">
+
+      <!-- Top Header Bar -->
+      <header class="sticky top-0 z-20 bg-surface-card border-b border-outline-variant px-lg lg:px-page py-md flex flex-wrap items-center justify-between gap-lg">
+        <div class="flex items-center gap-md min-w-0">
+          <button type="button" class="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-subtle" onclick="toggleSidebar()" aria-label="Open navigation">
+            <span class="material-symbols-outlined text-[20px]">menu</span>
+          </button>
+
+          <!-- Project Switcher -->
+          <button type="button" class="inline-flex items-center gap-md px-md py-sm rounded-lg bg-surface border border-outline-variant hover:border-outline transition-colors duration-state-change ease-state-change text-left min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <span class="w-2 h-2 rounded-full bg-emerald shrink-0" aria-hidden="true"></span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg text-on-surface truncate">
+              VastraKart Store Redesign — Fixed Cap <span class="font-mono tabular-nums">₹1,50,000</span>
+            </span>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant shrink-0">expand_more</span>
+          </button>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="flex items-center gap-md">
+          <!-- COMPONENT: button-secondary -->
+          <button data-component-id="button-secondary" data-component-type="button" data-component-variant="secondary" type="button" class="inline-flex items-center justify-center gap-sm px-lg py-sm rounded-lg bg-surface-card text-on-surface border border-outline-variant hover:bg-surface-subtle transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <span class="material-symbols-outlined text-[16px] text-on-surface-variant" aria-hidden="true">ios_share</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Share Client Portal</span>
+          </button>
+
+          <!-- COMPONENT: button-with-icon -->
+          <button data-component-id="button-with-icon" data-component-type="button" data-component-variant="with-icon" type="button" class="inline-flex items-center justify-center gap-sm px-lg py-sm rounded-lg bg-primary text-on-primary hover:bg-primary-hover transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Paste Client Message</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Workspace Content -->
+      <main class="flex-1 p-lg lg:p-page flex flex-col gap-2xl max-w-[1440px] w-full mx-auto">
+
+        <!-- Page Heading -->
+        <div class="flex flex-wrap items-center justify-between gap-md">
+          <div>
+            <h1 data-design-text-token="headline-lg" class="font-headline text-headline-lg text-on-surface">Live Scope Guardrail &amp; Trade-Off Swap Simulator</h1>
+            <p data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant mt-xs">
+              Parse incoming client requests against signed SOW deliverables and model zero-margin trade-offs.
+            </p>
+          </div>
+          <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">SIM-VK-1042</span>
+        </div>
+
+        <!-- Top Section: Incoming Client Message Analyzer -->
+        <section aria-label="Incoming Client Message Analyzer" class="bg-surface-card border border-outline-variant rounded-xl p-xl flex flex-col gap-lg">
+          <div class="flex flex-wrap items-center justify-between gap-md">
+            <div class="flex items-center gap-sm">
+              <span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">chat_bubble_outline</span>
+              <h2 data-design-text-token="headline-md" class="font-headline text-headline-md text-on-surface">Incoming Client Message Analyzer</h2>
+            </div>
+            <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">Source: WhatsApp / Slack</span>
+          </div>
+
+          <div class="flex flex-col gap-md">
+            <label for="client-message-input" class="sr-only">Client message text</label>
+            <textarea id="client-message-input" rows="3" class="w-full rounded-lg border border-outline-variant bg-surface p-lg font-body text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary resize-none">Hey team, quick thing—before Friday&#39;s launch can we also add WhatsApp OTP login and an Excel order export for our accounts team? Shouldn&#39;t take long!</textarea>
+
+            <div class="flex flex-wrap items-center justify-between gap-md">
+              <span data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant">
+                Comparing against 5 baseline deliverables (120 hrs cap @ ₹1,250/hr).
+              </span>
+              <!-- COMPONENT: button-primary -->
+              <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-sm px-lg py-sm rounded-lg bg-primary text-on-primary hover:bg-primary-hover transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">auto_awesome</span>
+                <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Analyze Against SOW Baseline</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Middle Section: 2-Column Comparison Split -->
+        <section aria-label="SOW baseline comparison" class="grid grid-cols-1 lg:grid-cols-2 gap-xl items-stretch">
+
+          <!-- Left Card: Covered in SOW Baseline -->
+          <article class="h-full bg-surface-card border border-outline-variant border-t-4 border-t-emerald rounded-xl p-xl flex flex-col gap-lg">
+            <header class="flex flex-wrap items-center justify-between gap-sm">
+              <div class="flex items-center gap-sm">
+                <span class="material-symbols-outlined text-[20px] text-emerald" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+                <h2 data-design-text-token="headline-md" class="font-headline text-headline-md text-on-surface">Covered in SOW Baseline (0 Extra Hrs)</h2>
+              </div>
+              <span data-component-id="badge-success" data-component-type="badge" data-component-variant="success" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-emerald-container text-on-emerald-container whitespace-nowrap">
+                <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">In-Scope</span>
+              </span>
+            </header>
+
+            <div class="p-lg rounded-lg bg-surface border border-outline-variant flex items-center justify-between gap-md">
+              <div class="flex flex-col gap-xs">
+                <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Standard User Authentication</span>
+                <span data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant">Matched to SOW Item #1 (Auth &amp; Email Login)</span>
+              </div>
+              <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-emerald-container tabular-nums whitespace-nowrap">0 Extra Hrs</span>
+            </div>
+          </article>
+
+          <!-- Right Card: Out-of-Scope Drift Detected -->
+          <article class="h-full bg-surface-card border border-outline-variant border-t-4 border-t-amber rounded-xl p-xl flex flex-col gap-lg">
+            <header class="flex flex-wrap items-center justify-between gap-sm">
+              <div class="flex items-center gap-sm">
+                <span class="material-symbols-outlined text-[20px] text-amber" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">warning</span>
+                <h2 data-design-text-token="headline-md" class="font-headline text-headline-md text-on-surface">Out-of-Scope Drift Detected (+14 hrs / +₹17,500)</h2>
+              </div>
+              <span data-component-id="badge-warning" data-component-type="badge" data-component-variant="warning" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-amber-container text-on-amber-container whitespace-nowrap">
+                <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">2 Drift Items</span>
+              </span>
+            </header>
+
+            <div class="flex flex-col gap-md">
+              <div class="p-lg rounded-lg bg-surface border border-outline-variant flex items-center justify-between gap-md">
+                <div class="flex items-center gap-md">
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">01</span>
+                  <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">WhatsApp / SMS 2FA OTP</span>
+                </div>
+                <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-amber-container tabular-nums whitespace-nowrap">+6 hrs (+₹7,500)</span>
+              </div>
+
+              <div class="p-lg rounded-lg bg-surface border border-outline-variant flex items-center justify-between gap-md">
+                <div class="flex items-center gap-md">
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">02</span>
+                  <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Excel &amp; CSV Order Export</span>
+                </div>
+                <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-amber-container tabular-nums whitespace-nowrap">+8 hrs (+₹10,000)</span>
+              </div>
+            </div>
+          </article>
+
+        </section>
+
+        <!-- Bottom Section: Select Resolution Path (3 Equal Side-by-Side Cards) -->
+        <section aria-label="Select Resolution Path" class="flex flex-col gap-lg">
+          <div class="flex flex-wrap items-center justify-between gap-md">
+            <h2 data-design-text-token="headline-md" class="font-headline text-headline-md text-on-surface">Select Resolution Path</h2>
+            <span data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant">Choose how to present this change to VastraKart</span>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-xl items-stretch">
+
+            <!-- Card 1: Scope Swap (Highlighted) -->
+            <article class="h-full bg-surface-card border-2 border-primary rounded-xl p-xl flex flex-col justify-between gap-lg">
+              <div class="flex flex-col gap-lg">
+                <div class="flex flex-wrap items-center justify-between gap-sm">
+                  <span data-component-id="badge-primary" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-primary-container text-on-primary-container whitespace-nowrap">
+                    <span data-design-text-token="label-sm" class="font-label text-label-sm whitespace-nowrap">Recommended — ₹0 Extra</span>
+                  </span>
+                </div>
+
+                <h3 data-design-text-token="headline-sm" class="font-headline text-headline-sm text-on-surface">Scope Swap (Zero Budget Impact)</h3>
+
+                <div class="flex flex-col gap-xs">
+                  <label for="swap-select" data-design-text-token="label-md" class="font-label text-label-md text-on-surface-variant">Select swappable SOW deliverable</label>
+                  <select id="swap-select" class="w-full rounded-lg border border-outline-variant bg-surface px-md py-sm font-body text-body-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary">
+                    <option selected>Trade: Blog &amp; Content CMS (14 hrs) → Phase 2</option>
+                    <option>Trade: Custom Analytics Reports (10 hrs) → Phase 2</option>
+                  </select>
+                </div>
+
+                <div class="p-md rounded-lg bg-surface border border-outline-variant">
+                  <p data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface tabular-nums">
+                    120 hrs - 14 hrs + 14 hrs = 120 hrs | Total stays ₹1,50,000
+                  </p>
+                </div>
+              </div>
+
+              <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="w-full inline-flex items-center justify-center gap-sm px-lg py-sm rounded-lg bg-primary text-on-primary hover:bg-primary-hover transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+                <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Apply Scope Swap &amp; Send Client Link</span>
+              </button>
+            </article>
+
+            <!-- Card 2: Paid Change Request -->
+            <article class="h-full bg-surface-card border border-outline-variant rounded-xl p-xl flex flex-col justify-between gap-lg">
+              <div class="flex flex-col gap-lg">
+                <div class="flex items-center justify-between gap-sm">
+                  <span data-component-id="badge-neutral" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-surface-subtle text-on-surface-subtle whitespace-nowrap">
+                    <span data-design-text-token="label-sm" class="font-label text-label-sm whitespace-nowrap">Cap Expansion</span>
+                  </span>
+                </div>
+
+                <h3 data-design-text-token="headline-sm" class="font-headline text-headline-sm text-on-surface">Paid Change Request</h3>
+
+                <p data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant text-pretty">
+                  Keep all baseline deliverables intact and issue a formal add-on invoice for the extra 14 hours.
+                </p>
+
+                <div class="p-md rounded-lg bg-surface border border-outline-variant">
+                  <p data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface tabular-nums">
+                    ₹1,50,000 + ₹17,500 = ₹1,67,500 (+3 Days Timeline)
+                  </p>
+                </div>
+              </div>
+
+              <button data-component-id="button-secondary" data-component-type="button" data-component-variant="secondary" type="button" class="w-full inline-flex items-center justify-center gap-sm px-lg py-sm rounded-lg bg-surface-card text-on-surface border border-outline-variant hover:bg-surface-subtle transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+                <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Generate Paid Add-On Link</span>
+              </button>
+            </article>
+
+            <!-- Card 3: Defer to Phase 2 -->
+            <article class="h-full bg-surface-card border border-outline-variant rounded-xl p-xl flex flex-col justify-between gap-lg">
+              <div class="flex flex-col gap-lg">
+                <div class="flex items-center justify-between gap-sm">
+                  <span data-component-id="badge-neutral" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-surface-subtle text-on-surface-subtle whitespace-nowrap">
+                    <span data-design-text-token="label-sm" class="font-label text-label-sm whitespace-nowrap">Backlog</span>
+                  </span>
+                </div>
+
+                <h3 data-design-text-token="headline-sm" class="font-headline text-headline-sm text-on-surface">Defer to Phase 2</h3>
+
+                <p data-design-text-token="body-md" class="font-body text-body-md text-on-surface-variant text-pretty">
+                  Log both requests into post-launch backlog without delaying Friday&#39;s release.
+                </p>
+
+                <div class="p-md rounded-lg bg-surface border border-outline-variant">
+                  <p data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">
+                    0 hrs added | Friday launch date protected
+                  </p>
+                </div>
+              </div>
+
+              <button data-component-id="button-secondary" data-component-type="button" data-component-variant="secondary" type="button" class="w-full inline-flex items-center justify-center gap-sm px-lg py-sm rounded-lg bg-surface-card text-on-surface border border-outline-variant hover:bg-surface-subtle transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+                <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Log to Phase 2 Backlog</span>
+              </button>
+            </article>
+
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      var sidebar = document.getElementById('app-sidebar');
+      var backdrop = document.getElementById('sidebar-backdrop');
+      if (!sidebar || !backdrop) return;
+      var isClosed = sidebar.classList.contains('-translate-x-full');
+      if (isClosed) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+  </script>
+
+
+</body></html>

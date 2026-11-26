@@ -1,0 +1,6 @@
+{
+  "name": "CSC Guardrail",
+  "description": "Agency scope health dashboard, live scope drift simulator, client one-click approval portal, and immutable change audit ledger.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

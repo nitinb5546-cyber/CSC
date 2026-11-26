@@ -1,0 +1,397 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Immutable Change &amp; Audit Ledger — CSC Guardrail</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config" data-stitch-original-src="da8cf5fb6f5ab2e4===../../tailwind.config.js">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#4F46E5',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#4338CA',
+        'primary-container': '#F2EFFF',
+        'on-primary-container': '#1D00A5',
+        'surface': '#F8FAFC',
+        'on-surface': '#0F172A',
+        'surface-card': '#FFFFFF',
+        'on-surface-variant': '#64748B',
+        'surface-subtle': '#F1F5F9',
+        'on-surface-subtle': '#334155',
+        'outline': '#CBD5E1',
+        'outline-variant': '#E2E8F0',
+        'emerald': '#059669',
+        'on-emerald': '#00150B',
+        'emerald-container': '#ECFDF5',
+        'on-emerald-container': '#003825',
+        'amber': '#D97706',
+        'on-amber': '#1F0C00',
+        'amber-container': '#FFFBEB',
+        'on-amber-container': '#4D2600',
+        'error': '#DC2626',
+        'on-error': '#FFFFFF',
+        'error-container': '#FEF2F2',
+        'on-error-container': '#690005',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'md': '6px',
+        'DEFAULT': '8px',
+        'lg': '8px',
+        'xl': '12px',
+        'full': '9999px',
+      },
+      spacing: {
+        'xs': '4px',
+        'sm': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        'section': '24px',
+        'page': '28px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"Geist Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '44px', letterSpacing: '-0.5px', fontWeight: '600' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.25px', fontWeight: '600' }],
+        'headline-lg': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'headline-md': ['18px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'headline-sm': ['15px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['15px', { lineHeight: '22px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '18px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-lg': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'mono-md': ['13px', { lineHeight: '18px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '200ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@500;600&amp;family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+  <div class="min-h-screen flex bg-surface">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-on-surface/30 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Left Sidebar (240px) -->
+    <aside id="app-sidebar" class="fixed lg:sticky top-0 left-0 z-40 w-[240px] shrink-0 min-h-screen bg-surface-card border-r border-outline-variant flex flex-col justify-between -translate-x-full lg:translate-x-0 transition-transform duration-surface-enter ease-surface-enter">
+      <div class="flex flex-col gap-2xl p-lg">
+        <!-- Brand Logo -->
+        <div class="flex items-center justify-between px-sm pt-xs">
+          <a href="#" class="flex items-center gap-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
+            <div class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: &#39;FILL&#39; 1;">verified_user</span>
+            </div>
+            <div class="flex flex-col">
+              <span data-design-text-token="headline-sm" class="font-headline text-headline-sm text-on-surface tracking-tight">CSC Guardrail</span>
+            </div>
+          </a>
+          <button type="button" class="lg:hidden p-xs rounded-lg text-on-surface-variant hover:bg-surface-subtle" onclick="toggleSidebar()" aria-label="Close navigation">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <!-- Primary Navigation -->
+        <nav aria-label="Main navigation" class="flex flex-col gap-xs">
+          <a href="../scope-dashboard/AgencyScopeHealthDashboard.html" class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change min-w-0">
+            <span class="material-symbols-outlined text-[18px] shrink-0">dashboard</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg truncate">Scope Dashboard</span>
+          </a>
+          <a href="../guardrail-simulator/GuardrailSimulator.html" class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change min-w-0">
+            <span class="material-symbols-outlined text-[18px] shrink-0">tune</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg truncate">Guardrail Simulator</span>
+          </a>
+          <a href="../client-portal/ClientApprovalPortal.html" class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change min-w-0">
+            <span class="material-symbols-outlined text-[18px] shrink-0">visibility</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg truncate">Client Portal Preview</span>
+          </a>
+          <a href="#" aria-current="page" class="flex items-center gap-md px-md py-sm rounded-lg bg-primary-container text-on-primary-container transition-colors duration-state-change ease-state-change min-w-0">
+            <span class="material-symbols-outlined text-[18px] shrink-0" style="font-variation-settings: &#39;FILL&#39; 1;">receipt_long</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg truncate">Audit Ledger</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Bottom Workspace Badge -->
+      <div class="p-lg border-t border-outline-variant">
+        <div class="flex items-center gap-md px-sm py-sm rounded-lg bg-surface border border-outline-variant">
+          <div class="w-8 h-8 rounded-md bg-surface-subtle text-on-surface flex items-center justify-center shrink-0">
+            <span data-design-text-token="label-md" class="font-label text-label-md">PS</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <span data-design-text-token="label-lg" class="font-label text-label-lg text-on-surface truncate">PixelCraft Studio</span>
+            <span data-design-text-token="label-sm" class="font-label text-label-sm text-on-surface-variant">Agency Workspace</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Shell -->
+    <div class="flex-1 min-w-0 flex flex-col">
+
+      <!-- Top Header Bar -->
+      <header class="sticky top-0 z-20 bg-surface-card border-b border-outline-variant px-lg lg:px-page py-md flex flex-wrap items-center justify-between gap-lg">
+        <div class="flex items-center gap-md min-w-0">
+          <button type="button" class="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-subtle" onclick="toggleSidebar()" aria-label="Open navigation">
+            <span class="material-symbols-outlined text-[20px]">menu</span>
+          </button>
+
+          <!-- Project Switcher -->
+          <button type="button" class="inline-flex items-center gap-md px-md py-sm rounded-lg bg-surface border border-outline-variant hover:border-outline transition-colors duration-state-change ease-state-change text-left min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <span class="w-2 h-2 rounded-full bg-emerald shrink-0" aria-hidden="true"></span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg text-on-surface truncate">
+              VastraKart Store Redesign — Fixed Cap <span class="font-mono tabular-nums">₹1,50,000</span>
+            </span>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant shrink-0">expand_more</span>
+          </button>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="flex items-center gap-md">
+          <!-- COMPONENT: button-secondary -->
+          <button data-component-id="button-secondary" data-component-type="button" data-component-variant="secondary" type="button" class="inline-flex items-center justify-center gap-sm px-lg py-sm rounded-lg bg-surface-card text-on-surface border border-outline-variant hover:bg-surface-subtle transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <span class="material-symbols-outlined text-[16px] text-on-surface-variant" aria-hidden="true">ios_share</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Share Client Portal</span>
+          </button>
+
+          <!-- COMPONENT: button-with-icon -->
+          <button data-component-id="button-with-icon" data-component-type="button" data-component-variant="with-icon" type="button" class="inline-flex items-center justify-center gap-sm px-lg py-sm rounded-lg bg-primary text-on-primary hover:bg-primary-hover transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Paste Client Message</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Workspace Content -->
+      <main class="flex-1 p-lg lg:p-page flex flex-col gap-2xl max-w-[1440px] w-full mx-auto">
+
+        <!-- Page Header -->
+        <div class="flex flex-wrap items-center justify-between gap-lg">
+          <div>
+            <h1 data-design-text-token="headline-lg" class="font-headline text-headline-lg text-on-surface">Immutable Scope &amp; Change Ledger</h1>
+            <p data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant mt-xs">
+              Tamper-evident record of all client scope decisions for VastraKart Store Redesign
+            </p>
+          </div>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-sm px-lg py-sm rounded-lg bg-primary text-on-primary hover:bg-primary-hover transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">picture_as_pdf</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Download Client Handoff PDF</span>
+          </button>
+        </div>
+
+        <!-- Filter Bar -->
+        <section aria-label="Ledger filters" class="flex flex-wrap items-center justify-between gap-lg">
+          <div class="flex flex-wrap items-center gap-sm" role="tablist" aria-label="Event categories">
+            <button type="button" role="tab" aria-selected="true" class="inline-flex items-center px-lg py-xs rounded-full bg-primary text-on-primary transition-colors duration-state-change ease-state-change whitespace-nowrap">
+              <span data-design-text-token="label-md" class="font-label text-label-md tabular-nums whitespace-nowrap">All Events (6)</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" class="inline-flex items-center px-lg py-xs rounded-full bg-surface-card text-on-surface-variant border border-outline-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change whitespace-nowrap">
+              <span data-design-text-token="label-md" class="font-label text-label-md tabular-nums whitespace-nowrap">Swapped ₹0 (3)</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" class="inline-flex items-center px-lg py-xs rounded-full bg-surface-card text-on-surface-variant border border-outline-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change whitespace-nowrap">
+              <span data-design-text-token="label-md" class="font-label text-label-md tabular-nums whitespace-nowrap">Paid Add-Ons (1)</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" class="inline-flex items-center px-lg py-xs rounded-full bg-surface-card text-on-surface-variant border border-outline-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change whitespace-nowrap">
+              <span data-design-text-token="label-md" class="font-label text-label-md tabular-nums whitespace-nowrap">Deferred (2)</span>
+            </button>
+          </div>
+
+          <div class="relative w-full sm:w-[280px]">
+            <label for="ledger-search" class="sr-only">Search audit ledger</label>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant absolute left-md top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true">search</span>
+            <input id="ledger-search" type="search" placeholder="Search hash or change..." class="w-full pl-3xl pr-md py-sm rounded-lg border border-outline-variant bg-surface-card font-body text-body-sm text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary">
+          </div>
+        </section>
+
+        <!-- Main Card: Audit Trail Data Table -->
+        <section aria-label="Audit trail table" class="bg-surface-card border border-outline-variant rounded-xl overflow-hidden">
+          <!-- COMPONENT: table-standard -->
+          <div data-component-id="table-standard" data-component-type="table" data-component-variant="standard" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-outline-variant bg-surface">
+                  <th scope="col" class="px-lg py-md text-on-surface-variant">
+                    <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Timestamp</span>
+                  </th>
+                  <th scope="col" class="px-lg py-md text-on-surface-variant">
+                    <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Requested Change</span>
+                  </th>
+                  <th scope="col" class="px-lg py-md text-on-surface-variant">
+                    <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Resolution Decision</span>
+                  </th>
+                  <th scope="col" class="px-lg py-md text-on-surface-variant text-right">
+                    <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Net Hour &amp; Cost Impact</span>
+                  </th>
+                  <th scope="col" class="px-lg py-md text-on-surface-variant text-right">
+                    <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Verification Hash</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant">
+                <!-- Row 1 -->
+                <tr class="hover:bg-surface transition-colors duration-state-change ease-state-change">
+                  <td class="px-lg py-lg">
+                    <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap">26 Nov 2026, 07:15 PM</span>
+                  </td>
+                  <td class="px-lg py-lg">
+                    <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">WhatsApp 2FA + Excel Export</span>
+                  </td>
+                  <td class="px-lg py-lg">
+                    <span data-component-id="badge-success" data-component-type="badge" data-component-variant="success" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-emerald-container text-on-emerald-container whitespace-nowrap">
+                      <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Swapped w/ Blog CMS</span>
+                    </span>
+                  </td>
+                  <td class="px-lg py-lg text-right">
+                    <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-emerald-container tabular-nums whitespace-nowrap">0 hrs / ₹0</span>
+                  </td>
+                  <td class="px-lg py-lg text-right">
+                    <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap">#CSC-892A · Client Approved</span>
+                  </td>
+                </tr>
+
+                <!-- Row 2 -->
+                <tr class="hover:bg-surface transition-colors duration-state-change ease-state-change">
+                  <td class="px-lg py-lg">
+                    <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap">24 Nov 2026, 04:30 PM</span>
+                  </td>
+                  <td class="px-lg py-lg">
+                    <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Multi-Currency Pricing</span>
+                  </td>
+                  <td class="px-lg py-lg">
+                    <span data-component-id="badge-neutral" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-surface-subtle text-on-surface-subtle whitespace-nowrap">
+                      <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Deferred to Phase 2</span>
+                    </span>
+                  </td>
+                  <td class="px-lg py-lg text-right">
+                    <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-surface-variant tabular-nums whitespace-nowrap">0 hrs / ₹0</span>
+                  </td>
+                  <td class="px-lg py-lg text-right">
+                    <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap">#CSC-889F · Logged</span>
+                  </td>
+                </tr>
+
+                <!-- Row 3 -->
+                <tr class="hover:bg-surface transition-colors duration-state-change ease-state-change">
+                  <td class="px-lg py-lg">
+                    <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap">21 Nov 2026, 11:10 AM</span>
+                  </td>
+                  <td class="px-lg py-lg">
+                    <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Priority GST Invoice Generator</span>
+                  </td>
+                  <td class="px-lg py-lg">
+                    <span data-component-id="badge-primary" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-primary-container text-on-primary-container whitespace-nowrap">
+                      <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Paid Add-On Approved</span>
+                    </span>
+                  </td>
+                  <td class="px-lg py-lg text-right">
+                    <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-primary-container tabular-nums whitespace-nowrap">+10 hrs / +₹12,500</span>
+                  </td>
+                  <td class="px-lg py-lg text-right">
+                    <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap">#CSC-881C · Signed</span>
+                  </td>
+                </tr>
+
+                <!-- Row 4 -->
+                <tr class="hover:bg-surface transition-colors duration-state-change ease-state-change">
+                  <td class="px-lg py-lg">
+                    <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap">18 Nov 2026, 02:05 PM</span>
+                  </td>
+                  <td class="px-lg py-lg">
+                    <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Custom Loyalty Wallet</span>
+                  </td>
+                  <td class="px-lg py-lg">
+                    <span data-component-id="badge-success" data-component-type="badge" data-component-variant="success" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-emerald-container text-on-emerald-container whitespace-nowrap">
+                      <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Swapped w/ Analytics</span>
+                    </span>
+                  </td>
+                  <td class="px-lg py-lg text-right">
+                    <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-emerald-container tabular-nums whitespace-nowrap">0 hrs / ₹0</span>
+                  </td>
+                  <td class="px-lg py-lg text-right">
+                    <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap">#CSC-874E · Client Approved</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Bottom Verification Banner -->
+        <aside aria-label="Cryptographic verification status" class="bg-emerald-container border border-outline-variant rounded-xl px-xl py-lg flex items-center gap-md">
+          <span class="material-symbols-outlined text-[20px] text-emerald shrink-0" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">verified</span>
+          <p data-design-text-token="body-md" class="font-body text-body-md text-on-emerald-container">
+            All 6 scope decisions cryptographically timestamped and synced with final SOW handoff summary.
+          </p>
+        </aside>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      var sidebar = document.getElementById('app-sidebar');
+      var backdrop = document.getElementById('sidebar-backdrop');
+      if (!sidebar || !backdrop) return;
+      var isClosed = sidebar.classList.contains('-translate-x-full');
+      if (isClosed) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+  </script>
+
+
+</body></html>

@@ -1,0 +1,534 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agency Scope Health Dashboard — CSC Guardrail</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config" data-stitch-original-src="da8cf5fb6f5ab2e4===../../tailwind.config.js">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#4F46E5',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#4338CA',
+        'primary-container': '#F2EFFF',
+        'on-primary-container': '#1D00A5',
+        'surface': '#F8FAFC',
+        'on-surface': '#0F172A',
+        'surface-card': '#FFFFFF',
+        'on-surface-variant': '#64748B',
+        'surface-subtle': '#F1F5F9',
+        'on-surface-subtle': '#334155',
+        'outline': '#CBD5E1',
+        'outline-variant': '#E2E8F0',
+        'emerald': '#059669',
+        'on-emerald': '#00150B',
+        'emerald-container': '#ECFDF5',
+        'on-emerald-container': '#003825',
+        'amber': '#D97706',
+        'on-amber': '#1F0C00',
+        'amber-container': '#FFFBEB',
+        'on-amber-container': '#4D2600',
+        'error': '#DC2626',
+        'on-error': '#FFFFFF',
+        'error-container': '#FEF2F2',
+        'on-error-container': '#690005',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'md': '6px',
+        'DEFAULT': '8px',
+        'lg': '8px',
+        'xl': '12px',
+        'full': '9999px',
+      },
+      spacing: {
+        'xs': '4px',
+        'sm': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        'section': '24px',
+        'page': '28px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"Geist Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '44px', letterSpacing: '-0.5px', fontWeight: '600' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.25px', fontWeight: '600' }],
+        'headline-lg': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'headline-md': ['18px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'headline-sm': ['15px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['15px', { lineHeight: '22px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '18px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-lg': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'mono-md': ['13px', { lineHeight: '18px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '200ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@500;600&amp;family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+  <div class="min-h-screen flex bg-surface">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-on-surface/30 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Left Sidebar (240px) -->
+    <aside id="app-sidebar" class="fixed lg:sticky top-0 left-0 z-40 w-[240px] shrink-0 min-h-screen bg-surface-card border-r border-outline-variant flex flex-col justify-between -translate-x-full lg:translate-x-0 transition-transform duration-surface-enter ease-surface-enter">
+      <div class="flex flex-col gap-2xl p-lg">
+        <!-- Brand Logo -->
+        <div class="flex items-center justify-between px-sm pt-xs">
+          <a href="#" class="flex items-center gap-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
+            <div class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: &#39;FILL&#39; 1;">verified_user</span>
+            </div>
+            <div class="flex flex-col">
+              <span data-design-text-token="headline-sm" class="font-headline text-headline-sm text-on-surface tracking-tight">CSC Guardrail</span>
+            </div>
+          </a>
+          <button type="button" class="lg:hidden p-xs rounded-lg text-on-surface-variant hover:bg-surface-subtle" onclick="toggleSidebar()" aria-label="Close navigation">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <!-- Primary Navigation -->
+        <nav aria-label="Main navigation" class="flex flex-col gap-xs">
+          <a href="#" aria-current="page" class="flex items-center gap-md px-md py-sm rounded-lg bg-primary-container text-on-primary-container transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[18px] shrink-0" style="font-variation-settings: &#39;FILL&#39; 1;">dashboard</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Scope Dashboard</span>
+          </a>
+          <a href="#" class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[18px] shrink-0">tune</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Guardrail Simulator</span>
+          </a>
+          <a href="#" class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[18px] shrink-0">visibility</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Client Portal Preview</span>
+          </a>
+          <a href="#" class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[18px] shrink-0">receipt_long</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Audit Ledger</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Bottom Workspace Badge -->
+      <div class="p-lg border-t border-outline-variant">
+        <div class="flex items-center gap-md px-sm py-sm rounded-lg bg-surface border border-outline-variant">
+          <div class="w-8 h-8 rounded-md bg-surface-subtle text-on-surface flex items-center justify-center shrink-0">
+            <span data-design-text-token="label-md" class="font-label text-label-md">PS</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <span data-design-text-token="label-lg" class="font-label text-label-lg text-on-surface truncate">PixelCraft Studio</span>
+            <span data-design-text-token="label-sm" class="font-label text-label-sm text-on-surface-variant">Agency Workspace</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Shell -->
+    <div class="flex-1 min-w-0 flex flex-col">
+
+      <!-- Top Header Bar -->
+      <header class="sticky top-0 z-20 bg-surface-card border-b border-outline-variant px-lg lg:px-page py-md flex flex-wrap items-center justify-between gap-lg">
+        <div class="flex items-center gap-md min-w-0">
+          <button type="button" class="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-subtle" onclick="toggleSidebar()" aria-label="Open navigation">
+            <span class="material-symbols-outlined text-[20px]">menu</span>
+          </button>
+
+          <!-- Project Switcher -->
+          <button type="button" class="inline-flex items-center gap-md px-md py-sm rounded-lg bg-surface border border-outline-variant hover:border-outline transition-colors duration-state-change ease-state-change text-left min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <span class="w-2 h-2 rounded-full bg-emerald shrink-0" aria-hidden="true"></span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg text-on-surface truncate">
+              VastraKart Store Redesign — Fixed Cap <span class="font-mono tabular-nums">₹1,50,000</span>
+            </span>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant shrink-0">expand_more</span>
+          </button>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="flex items-center gap-md">
+          <!-- COMPONENT: button-secondary -->
+          <button data-component-id="button-secondary" data-component-type="button" data-component-variant="secondary" type="button" class="inline-flex items-center justify-center gap-sm px-lg py-sm rounded-lg bg-surface-card text-on-surface border border-outline-variant hover:bg-surface-subtle transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <span class="material-symbols-outlined text-[16px] text-on-surface-variant" aria-hidden="true">ios_share</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Share Client Portal</span>
+          </button>
+
+          <!-- COMPONENT: button-with-icon -->
+          <button data-component-id="button-with-icon" data-component-type="button" data-component-variant="with-icon" type="button" class="inline-flex items-center justify-center gap-sm px-lg py-sm rounded-lg bg-primary text-on-primary hover:bg-primary-hover transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg whitespace-nowrap">Paste Client Message</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Workspace Content -->
+      <main class="flex-1 p-lg lg:p-page flex flex-col gap-2xl max-w-[1440px] w-full mx-auto">
+
+        <!-- Page Heading -->
+        <div class="flex flex-wrap items-center justify-between gap-md">
+          <div>
+            <h1 data-design-text-token="headline-lg" class="font-headline text-headline-lg text-on-surface">Agency Scope Health Dashboard</h1>
+            <p data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant mt-xs">
+              Real-time SOW cap tracking, deliverable swap buffer, and automated scope drift detection.
+            </p>
+          </div>
+          <div class="flex items-center gap-sm">
+            <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">SOW-VK-2026-04</span>
+          </div>
+        </div>
+
+        <!-- Top Row: 4 Bento KPI Cards -->
+        <section aria-label="Scope health metrics" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-xl items-stretch">
+
+          <!-- KPI 1: Contract Value -->
+          <!-- COMPONENT: card-outlined -->
+          <article data-component-id="card-outlined" data-component-type="card" data-component-variant="outlined" class="h-full bg-surface-card border border-outline-variant rounded-xl p-xl flex flex-col justify-between gap-md">
+            <header class="flex items-center justify-between gap-sm">
+              <h2 data-design-text-token="label-md" class="font-label text-label-md text-on-surface-variant">Contract Value</h2>
+              <span class="material-symbols-outlined text-[18px] text-on-surface-variant" aria-hidden="true">account_balance_wallet</span>
+            </header>
+            <div class="flex flex-col gap-xs">
+              <p data-design-text-token="mono-lg" class="font-mono text-mono-lg text-on-surface tabular-nums">₹1,50,000</p>
+              <p data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant">Fixed SOW Cap</p>
+            </div>
+          </article>
+
+          <!-- KPI 2: Allocated Hours -->
+          <!-- COMPONENT: card-outlined -->
+          <article data-component-id="card-outlined" data-component-type="card" data-component-variant="outlined" class="h-full bg-surface-card border border-outline-variant rounded-xl p-xl flex flex-col justify-between gap-md">
+            <header class="flex items-center justify-between gap-sm">
+              <h2 data-design-text-token="label-md" class="font-label text-label-md text-on-surface-variant">Allocated Hours</h2>
+              <span class="material-symbols-outlined text-[18px] text-on-surface-variant" aria-hidden="true">schedule</span>
+            </header>
+            <div class="flex flex-col gap-sm">
+              <p data-design-text-token="mono-lg" class="font-mono text-mono-lg text-on-surface tabular-nums">86 / 120 hrs</p>
+              <div class="w-full h-2 rounded-full bg-surface-subtle overflow-hidden" role="progressbar" aria-valuenow="86" aria-valuemin="0" aria-valuemax="120" aria-label="86 of 120 hours allocated">
+                <div class="h-full bg-emerald rounded-full" style="width: 71.7%;"></div>
+              </div>
+              <p data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant tabular-nums">34 hrs remaining</p>
+            </div>
+          </article>
+
+          <!-- KPI 3: Pending Requests -->
+          <!-- COMPONENT: card-outlined -->
+          <article data-component-id="card-outlined" data-component-type="card" data-component-variant="outlined" class="h-full bg-surface-card border border-outline-variant rounded-xl p-xl flex flex-col justify-between gap-md">
+            <header class="flex items-center justify-between gap-sm">
+              <h2 data-design-text-token="label-md" class="font-label text-label-md text-on-surface-variant">Pending Requests</h2>
+              <span class="material-symbols-outlined text-[18px] text-amber" aria-hidden="true">pending_actions</span>
+            </header>
+            <div class="flex flex-col items-start gap-sm">
+              <span data-component-id="badge-warning" data-component-type="badge" data-component-variant="warning" role="status" class="inline-flex items-center gap-xs px-md py-xs rounded-full bg-amber-container text-on-amber-container">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber" aria-hidden="true"></span>
+                <span data-design-text-token="label-md" class="font-label text-label-md tabular-nums whitespace-nowrap">2 Unresolved</span>
+              </span>
+              <p data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant">Flagged against SOW baseline</p>
+            </div>
+          </article>
+
+          <!-- KPI 4: Margin Protected -->
+          <!-- COMPONENT: card-outlined -->
+          <article data-component-id="card-outlined" data-component-type="card" data-component-variant="outlined" class="h-full bg-surface-card border border-outline-variant rounded-xl p-xl flex flex-col justify-between gap-md">
+            <header class="flex items-center justify-between gap-sm">
+              <h2 data-design-text-token="label-md" class="font-label text-label-md text-on-surface-variant">Margin Protected</h2>
+              <span class="material-symbols-outlined text-[18px] text-emerald" aria-hidden="true">shield</span>
+            </header>
+            <div class="flex flex-col gap-xs">
+              <p data-design-text-token="mono-lg" class="font-mono text-mono-lg text-emerald tabular-nums">₹28,500 Saved</p>
+              <p data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant tabular-nums">3 creep requests caught</p>
+            </div>
+          </article>
+
+        </section>
+
+        <!-- Main Split Content (65% Left / 35% Right) -->
+        <section aria-label="Deliverables and scope drift alerts" class="grid grid-cols-1 lg:grid-cols-12 gap-xl items-start">
+
+          <!-- Left Card (65% -> 8 cols): SOW Baseline Deliverables -->
+          <div class="lg:col-span-8 bg-surface-card border border-outline-variant rounded-xl overflow-hidden">
+            <div class="px-xl py-lg border-b border-outline-variant flex flex-wrap items-center justify-between gap-md">
+              <div>
+                <h2 data-design-text-token="headline-md" class="font-headline text-headline-md text-on-surface">SOW Baseline Deliverables</h2>
+                <p data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant mt-xs">
+                  Signed scope items and eligible hour-swap buffers under fixed cap.
+                </p>
+              </div>
+              <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant bg-surface px-md py-xs rounded-md border border-outline-variant tabular-nums whitespace-nowrap">
+                24 hrs swappable
+              </span>
+            </div>
+
+            <!-- COMPONENT: table-standard -->
+            <div data-component-id="table-standard" data-component-type="table" data-component-variant="standard" class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-outline-variant bg-surface">
+                    <th scope="col" class="px-lg py-md text-on-surface-variant">
+                      <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Deliverable</span>
+                    </th>
+                    <th scope="col" class="px-lg py-md text-on-surface-variant text-right">
+                      <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Allocated Hrs</span>
+                    </th>
+                    <th scope="col" class="px-lg py-md text-on-surface-variant">
+                      <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Status</span>
+                    </th>
+                    <th scope="col" class="px-lg py-md text-on-surface-variant text-right">
+                      <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Swap Eligibility</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant">
+                  <!-- Row 1 -->
+                  <tr class="hover:bg-surface transition-colors duration-state-change ease-state-change">
+                    <td class="px-lg py-lg">
+                      <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Auth &amp; Email Login</span>
+                    </td>
+                    <td class="px-lg py-lg text-right">
+                      <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-surface tabular-nums whitespace-nowrap">8 hrs</span>
+                    </td>
+                    <td class="px-lg py-lg">
+                      <span data-component-id="badge-success" data-component-type="badge" data-component-variant="success" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-emerald-container text-on-emerald-container whitespace-nowrap">
+                        <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Completed</span>
+                      </span>
+                    </td>
+                    <td class="px-lg py-lg text-right">
+                      <span data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant inline-flex items-center gap-xs whitespace-nowrap">
+                        <span class="material-symbols-outlined text-[14px]" aria-hidden="true">lock</span>
+                        Locked
+                      </span>
+                    </td>
+                  </tr>
+
+                  <!-- Row 2 -->
+                  <tr class="hover:bg-surface transition-colors duration-state-change ease-state-change">
+                    <td class="px-lg py-lg">
+                      <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Product Catalog &amp; Filters</span>
+                    </td>
+                    <td class="px-lg py-lg text-right">
+                      <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-surface tabular-nums whitespace-nowrap">28 hrs</span>
+                    </td>
+                    <td class="px-lg py-lg">
+                      <span data-component-id="badge-primary" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-primary-container text-on-primary-container whitespace-nowrap">
+                        <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">In Progress</span>
+                      </span>
+                    </td>
+                    <td class="px-lg py-lg text-right">
+                      <span data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant inline-flex items-center gap-xs whitespace-nowrap">
+                        <span class="material-symbols-outlined text-[14px]" aria-hidden="true">lock</span>
+                        Locked
+                      </span>
+                    </td>
+                  </tr>
+
+                  <!-- Row 3 -->
+                  <tr class="hover:bg-surface transition-colors duration-state-change ease-state-change">
+                    <td class="px-lg py-lg">
+                      <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Razorpay Checkout</span>
+                    </td>
+                    <td class="px-lg py-lg text-right">
+                      <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-surface tabular-nums whitespace-nowrap">16 hrs</span>
+                    </td>
+                    <td class="px-lg py-lg">
+                      <span data-component-id="badge-neutral" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-surface-subtle text-on-surface-subtle whitespace-nowrap">
+                        <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Not Started</span>
+                      </span>
+                    </td>
+                    <td class="px-lg py-lg text-right">
+                      <span data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant inline-flex items-center gap-xs whitespace-nowrap">
+                        <span class="material-symbols-outlined text-[14px]" aria-hidden="true">lock</span>
+                        Locked
+                      </span>
+                    </td>
+                  </tr>
+
+                  <!-- Row 4 -->
+                  <tr class="hover:bg-surface transition-colors duration-state-change ease-state-change">
+                    <td class="px-lg py-lg">
+                      <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Blog &amp; Content CMS</span>
+                    </td>
+                    <td class="px-lg py-lg text-right">
+                      <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-surface tabular-nums whitespace-nowrap">14 hrs</span>
+                    </td>
+                    <td class="px-lg py-lg">
+                      <span data-component-id="badge-neutral" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-surface-subtle text-on-surface-subtle whitespace-nowrap">
+                        <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Not Started</span>
+                      </span>
+                    </td>
+                    <td class="px-lg py-lg text-right">
+                      <span data-design-text-token="mono-sm" class="font-mono text-mono-sm inline-flex items-center gap-xs px-md py-xs rounded-md bg-emerald-container text-on-emerald-container tabular-nums whitespace-nowrap">
+                        Swappable (14 hrs)
+                      </span>
+                    </td>
+                  </tr>
+
+                  <!-- Row 5 -->
+                  <tr class="hover:bg-surface transition-colors duration-state-change ease-state-change">
+                    <td class="px-lg py-lg">
+                      <span data-design-text-token="body-md" class="font-body text-body-md text-on-surface">Custom Analytics Reports</span>
+                    </td>
+                    <td class="px-lg py-lg text-right">
+                      <span data-design-text-token="mono-md" class="font-mono text-mono-md text-on-surface tabular-nums whitespace-nowrap">10 hrs</span>
+                    </td>
+                    <td class="px-lg py-lg">
+                      <span data-component-id="badge-neutral" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center px-md py-xs rounded-full bg-surface-subtle text-on-surface-subtle whitespace-nowrap">
+                        <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Not Started</span>
+                      </span>
+                    </td>
+                    <td class="px-lg py-lg text-right">
+                      <span data-design-text-token="mono-sm" class="font-mono text-mono-sm inline-flex items-center gap-xs px-md py-xs rounded-md bg-emerald-container text-on-emerald-container tabular-nums whitespace-nowrap">
+                        Swappable (10 hrs)
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right Card (35% -> 4 cols): Recent Scope Drift Alerts -->
+          <div class="lg:col-span-4 bg-surface-card border border-outline-variant rounded-xl overflow-hidden flex flex-col">
+            <div class="px-xl py-lg border-b border-outline-variant flex items-center justify-between gap-md">
+              <div>
+                <h2 data-design-text-token="headline-md" class="font-headline text-headline-md text-on-surface">Recent Scope Drift Alerts</h2>
+                <p data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant mt-xs">
+                  Client messages flagged against SOW baseline.
+                </p>
+              </div>
+            </div>
+
+            <div class="p-xl flex flex-col gap-xl">
+              <!-- Timeline Item 1 (Prompt-specified) -->
+              <article class="relative pl-xl border-l border-outline-variant flex flex-col gap-sm">
+                <span class="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-error ring-4 ring-surface-card" aria-hidden="true"></span>
+                <div class="flex items-center justify-between gap-sm">
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">[10:42 AM]</span>
+                  <span data-component-id="badge-error" data-component-type="badge" data-component-variant="error" role="status" class="inline-flex items-center px-sm py-xs rounded-full bg-error-container text-on-error-container whitespace-nowrap">
+                    <span data-design-text-token="label-sm" class="font-label text-label-sm whitespace-nowrap">Out-of-Scope</span>
+                  </span>
+                </div>
+                <p data-design-text-token="body-md" class="font-body text-body-md text-on-surface text-pretty">
+                  WhatsApp OTP &amp; Excel Export requested
+                </p>
+                <div class="flex flex-wrap items-center justify-between gap-sm pt-xs">
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-error tabular-nums">Flagged +14 hrs (+₹17,500)</span>
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">AUD-1042</span>
+                </div>
+              </article>
+
+              <!-- Timeline Item 2 -->
+              <article class="relative pl-xl border-l border-outline-variant flex flex-col gap-sm">
+                <span class="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-amber ring-4 ring-surface-card" aria-hidden="true"></span>
+                <div class="flex items-center justify-between gap-sm">
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">[Yesterday, 4:18 PM]</span>
+                  <span data-component-id="badge-warning" data-component-type="badge" data-component-variant="warning" role="status" class="inline-flex items-center px-sm py-xs rounded-full bg-amber-container text-on-amber-container whitespace-nowrap">
+                    <span data-design-text-token="label-sm" class="font-label text-label-sm whitespace-nowrap">Pending Swap</span>
+                  </span>
+                </div>
+                <p data-design-text-token="body-md" class="font-body text-body-md text-on-surface text-pretty">
+                  Multi-currency GST invoice PDF export
+                </p>
+                <div class="flex flex-wrap items-center justify-between gap-sm pt-xs">
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-amber-container tabular-nums">Flagged +8 hrs (+₹10,000)</span>
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">AUD-1039</span>
+                </div>
+              </article>
+
+              <!-- Timeline Item 3 -->
+              <article class="relative pl-xl border-l border-outline-variant flex flex-col gap-sm">
+                <span class="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-emerald ring-4 ring-surface-card" aria-hidden="true"></span>
+                <div class="flex items-center justify-between gap-sm">
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">[Nov 23, 11:05 AM]</span>
+                  <span data-component-id="badge-success" data-component-type="badge" data-component-variant="success" role="status" class="inline-flex items-center px-sm py-xs rounded-full bg-emerald-container text-on-emerald-container whitespace-nowrap">
+                    <span data-design-text-token="label-sm" class="font-label text-label-sm whitespace-nowrap">Swapped</span>
+                  </span>
+                </div>
+                <p data-design-text-token="body-md" class="font-body text-body-md text-on-surface text-pretty">
+                  Custom loyalty tier rules swapped into buffer
+                </p>
+                <div class="flex flex-wrap items-center justify-between gap-sm pt-xs">
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-emerald-container tabular-nums">Protected ₹11,000 (0 hrs net)</span>
+                  <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-on-surface-variant tabular-nums">AUD-1031</span>
+                </div>
+              </article>
+            </div>
+
+            <footer class="px-xl py-md bg-surface border-t border-outline-variant flex items-center justify-between">
+              <span data-design-text-token="body-sm" class="font-body text-body-sm text-on-surface-variant">3 alerts this sprint</span>
+              <a href="#" class="inline-flex items-center gap-xs text-primary hover:text-primary-hover transition-colors duration-state-change ease-state-change whitespace-nowrap">
+                <span data-design-text-token="label-md" class="font-label text-label-md whitespace-nowrap">Open Audit Ledger</span>
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_forward</span>
+              </a>
+            </footer>
+          </div>
+
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      var sidebar = document.getElementById('app-sidebar');
+      var backdrop = document.getElementById('sidebar-backdrop');
+      if (!sidebar || !backdrop) return;
+      var isClosed = sidebar.classList.contains('-translate-x-full');
+      if (isClosed) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+  </script>
+
+
+</body></html>
